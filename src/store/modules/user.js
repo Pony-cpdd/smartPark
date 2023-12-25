@@ -1,21 +1,29 @@
+import { loginAPI } from '@/api/user'
+import { setToken, getToken } from '@/utils/auth'
+
 export default {
   // 命名空间
-  namespaced:true,
+  namespaced: true,
   // 函数写法
   state: {
-
+    token: getToken() || ''
   },
+  // mutations中只有一种调用方式： store.commit('mutations中的方法名')  并没有方法名()
   mutations: {
-
+    setToken(state, newToken) {
+      state.token = newToken
+      setToken(newToken)
+    }
   },
   actions: {
-
+    async loginAction(store, data) {
+      const res = await loginAPI(data)
+      store.commit('setToken', res.data.token)
+      console.log(res)
+    }
   },
-  getters:{
-
-  }
+  getters: {}
 }
-
 
 // 语法：使用与子模块的各个数据和方法
 // 1.使用state：
@@ -34,7 +42,7 @@ export default {
 /**
  * 重复使用：
  * import {mapGetters} from 'vuex'
- * computer:{
+ * computed:{
  *  ...mapGetters('model',['getters方法名1',........])
  * }
  */
