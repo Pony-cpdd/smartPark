@@ -36,7 +36,8 @@ service.interceptors.response.use(
   },
   error => {
     // 响应失败4xx-5xx
-    console.dir(error)
+    // console.dir(error)
+    // 做拦截器接口统一错误处理
     // 判断token是否过期
     if (error.response.status === 401) {
       store.commit('user/removeToken')

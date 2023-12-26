@@ -59,8 +59,10 @@ export default {
     }
   },
   created() {
+    // 回填账号密码
     const loginData = localStorage.getItem(FORM_KEY)
     if (loginData) {
+      // 将值取出来并赋给对象
       const { username, password } = JSON.parse(loginData)
       this.loginForm.username = username
       this.loginForm.password = password
@@ -73,7 +75,9 @@ export default {
         // const res = await loginAPI(this.loginForm)
         // this.$store.commit('user/setToken', res.data.token)
         await this.$store.dispatch('user/loginAction', this.loginForm)
+        // 判断是否记住账号密码
         if (this.rememberMe) {
+          // JSON.stringify表单数据转化为字符串
           localStorage.setItem(FORM_KEY, JSON.stringify(this.loginForm))
         } else {
           localStorage.removeItem(FORM_KEY)

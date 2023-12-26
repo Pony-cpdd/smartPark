@@ -15,6 +15,7 @@ export function loginAPI(data) {
     data
   })
 }
+// 做测试用，判断cookie失效时重新登录
 export function getIndustryAPI() {
   return request({
     url: 'park/industry'
