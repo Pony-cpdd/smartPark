@@ -114,8 +114,7 @@ export const routes = [
   }
 ]
 
-
-// 箭头函数（复用）  创建Router实例 
+// 箭头函数（复用）  创建Router实例
 const createRouter = () => new Router({
   // mode: 'history', // require service support
   // mode : 默认hash通过 # 连接 history通过 / 连接

@@ -1,5 +1,5 @@
 import { loginAPI } from '@/api/user'
-import { setToken, getToken } from '@/utils/auth'
+import { setToken, getToken, removeToken } from '@/utils/auth'
 
 export default {
   // 命名空间
@@ -13,13 +13,19 @@ export default {
     setToken(state, newToken) {
       state.token = newToken
       setToken(newToken)
+    },
+    removeToken(state) {
+      // vuex中的cookie清空
+      state.token = ''
+      // 本地的cookie清空
+      removeToken()
     }
   },
   actions: {
     async loginAction(store, data) {
       const res = await loginAPI(data)
       store.commit('setToken', res.data.token)
-      console.log(res)
+      // console.log(res)
     }
   },
   getters: {}

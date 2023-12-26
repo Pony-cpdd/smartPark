@@ -15,6 +15,9 @@ import store from './store'
 // 引入VueRoute
 import router from './router'
 
+// 引入拦截器
+import './permission'
+
 // 注册svg
 import '@/icons'
 // 把element-ui中导出的所有组件注册成全局组件

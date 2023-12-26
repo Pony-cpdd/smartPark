@@ -24,7 +24,7 @@
         </el-form-item>
 
         <el-form-item prop="remember">
-          <el-checkbox>记住我</el-checkbox>
+          <el-checkbox v-model="rememberMe">记住我</el-checkbox>
         </el-form-item>
 
         <el-form-item>
@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import { FORM_KEY } from '@/constants/KEY'
 export default {
   name: 'Login',
   data() {
@@ -44,6 +45,7 @@ export default {
         username: '',
         password: ''
       },
+      rememberMe: true,
       rules: {
         username: [
           // blur: 失焦 ，change：内容改变
@@ -56,13 +58,33 @@ export default {
       }
     }
   },
+  created() {
+    const loginData = localStorage.getItem(FORM_KEY)
+    if (loginData) {
+      const { username, password } = JSON.parse(loginData)
+      this.loginForm.username = username
+      this.loginForm.password = password
+    }
+  },
   methods: {
     handleLogin() {
       this.$refs['form'].validate(async(flag) => {
         if (!flag) return
         // const res = await loginAPI(this.loginForm)
         // this.$store.commit('user/setToken', res.data.token)
-        this.$store.dispatch('user/loginAction', this.loginForm)
+        await this.$store.dispatch('user/loginAction', this.loginForm)
+        if (this.rememberMe) {
+          localStorage.setItem(FORM_KEY, JSON.stringify(this.loginForm))
+        } else {
+          localStorage.removeItem(FORM_KEY)
+        }
+        // 实现哪个页面退出的，登陆时就回到哪个页面
+        // console.log(this.$route.query.redirect) 路由值
+        if (this.$route.query.redirect) {
+          this.$router.push(this.$route.query.redirect)
+        } else {
+          this.$router.push('/')
+        }
       })
     }
   }
