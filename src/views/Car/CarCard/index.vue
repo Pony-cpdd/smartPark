@@ -90,6 +90,7 @@
 import { getCardListAPI } from '@/api/card'
 export default {
   data() {
+    // 封装参数
     return {
       params: {
         page: 1,
@@ -99,7 +100,9 @@ export default {
         // 默认值为 null 传参时不带
         cardStatus: null
       },
+      // 渲染界面数据
       list: [],
+      // 总条数
       total: 0
     }
   },
