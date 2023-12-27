@@ -13,3 +13,18 @@ export function getBuildingListAPI(params) {
     params
   })
 }
+
+/**
+ * 添加楼宇
+ * @param data
+ * @returns {AxiosPromise}
+ */
+//  https://api-hmzs.itheima.net/v1/park/building
+export function addBuildingAPI(data) {
+  return request({
+    url: '/park/building',
+    method: 'POST',
+    data
+  })
+}
+

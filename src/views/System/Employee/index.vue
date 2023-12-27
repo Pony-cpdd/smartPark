@@ -18,9 +18,9 @@
         <el-table-column label="联系方式" width="120" prop="phonenumber" />
         <el-table-column label="角色" width="120" prop="roleName" />
         <el-table-column label="状态" prop="status" :formatter="formatterStatus">
-          <template #default="scope">
-            {{ scope.row.status }}
-          </template>
+<!--          <template #default="scope">-->
+<!--            {{ scope.row.status }}-->
+<!--          </template>-->
         </el-table-column>
         <el-table-column label="添加时间" prop="createTime" />
         <el-table-column label="操作" fixed="right" width="120">
