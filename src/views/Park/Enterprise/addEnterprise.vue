@@ -44,17 +44,18 @@
             <el-form-item label="联系电话" prop="contactNumber">
               <el-input v-model="addForm.contactNumber"/>
             </el-form-item>
-            <el-form-item label="营业执照" prop="businessLicenseUrl">
+            <el-form-item label="营业执照" prop="businessLicenseId">
               <el-upload
                 class="upload-demo"
                 action="#"
                 :http-request="uploadFile"
-                ref="upload"
-                file-list.sync="fileList"
+                :before-upload="beforeUpload"
+                :on-remove="onremove"
               >
                 <el-button size="small" type="primary">点击上传</el-button>
                 <div slot="tip" class="el-upload__tip">只能上传.jpg .jpeg .png文件，且不超过5M</div>
               </el-upload>
+              <img v-if="id" :src="addForm.businessLicenseUrl" style="width: 100px">
             </el-form-item>
           </el-form>
         </div>
@@ -70,7 +71,7 @@
 </template>
 
 <script>
-import { getIndustryListAPI, addEnterpriseAPI, getEnterpriseByIdAPI } from '@/api/enterprise'
+import { getIndustryListAPI, addEnterpriseAPI, getEnterpriseByIdAPI, updateEnterpriseAPI } from '@/api/enterprise'
 import { upload } from '@/api/common'
 export default {
   data() {
@@ -101,7 +102,7 @@ export default {
             trigger: 'blur'
           }
         ],
-        businessLicenseUrl: [{ required: true, message: '请上传营业执照', trigger: 'blur' }]
+        businessLicenseId: [{ required: true, message: '请上传营业执照', trigger: 'blur' }]
       },
       // 行业下拉列表
       industryList: [{
@@ -116,19 +117,25 @@ export default {
     }
   },
   created() {
-    console.log(this.id)
     this.getIndustryList()
     if (this.id) {
       this.getEnterpriseById()
     }
   },
   methods: {
+    // 监听用户上传营业执照
+    onremove() {
+      this.addForm.businessLicenseId = ''
+      this.addForm.businessLicenseUrl = ''
+      this.$refs.addForm.validateField('businessLicenseId')
+    },
     // 根据id查询企业
     async getEnterpriseById() {
       const res = await getEnterpriseByIdAPI(this.id)
-      const { name, legalPerson, registeredAddress, industryCode, contact, contactNumber, businessLicenseUrl, businessLicenseId } = res.data
-      this.addForm = { name, legalPerson, registeredAddress, industryCode, contact, contactNumber, businessLicenseUrl, businessLicenseId }
-      // console.log(res)
+      // 企业数据回填
+      const { name, legalPerson, registeredAddress, industryCode, contact, contactNumber, businessLicenseUrl, businessLicenseId, id } = res.data
+      this.addForm = { name, legalPerson, registeredAddress, industryCode, contact, contactNumber, businessLicenseUrl, businessLicenseId, id }
+      // console.log(this.fileList.name)
     },
     // 上传图片的校验
     beforeUpload(file) {
@@ -150,21 +157,16 @@ export default {
     async uploadFile({ file }) {
       // 数据封装
       const data = new FormData()
-      const flag = this.beforeUpload(file)
-      console.log(flag)
-      if (flag) {
-        data.append('file', file)
-        data.append('type', 1)
-        const res = await upload(data)
-        // console.log(res)
-        // 参数回填至addForm
-        this.addForm.businessLicenseId = res.data.id
-        this.addForm.businessLicenseUrl = res.data.url
-        //   对上传按钮单独进行校验
-        this.$refs.addForm.validateField('businessLicenseUrl')
-      } else {
-        this.$refs.upload.clearFiles()
-      }
+      // console.log(flag)
+      data.append('file', file)
+      data.append('type', 1)
+      const res = await upload(data)
+      // console.log(res)
+      // 参数回填至addForm
+      this.addForm.businessLicenseId = res.data.id
+      this.addForm.businessLicenseUrl = res.data.url
+      //   对上传按钮单独进行校验
+      this.$refs.addForm.validateField('businessLicenseUrl')
     },
     // 重置表单
     resetForm() {
@@ -185,9 +187,13 @@ export default {
       this.$refs.addForm.validate(async(flag) => {
         if (!flag) return
         // console.log('调用接口')
-        await addEnterpriseAPI(this.addForm)
-        // console.log(res)
-        this.$message.success('添加成功')
+        if (this.id) {
+          await updateEnterpriseAPI(this.addForm)
+          this.$message.success('更新成功')
+        } else {
+          await addEnterpriseAPI(this.addForm)
+          this.$message.success('添加成功')
+        }
         // 跳回上一页
         this.$router.back()
       })

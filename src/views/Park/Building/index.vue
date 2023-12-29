@@ -222,7 +222,14 @@ export default {
     // 关闭弹窗
     closeDialog() {
       this.dialogVisible = false
-      this.addForm = []
+      this.addForm = {
+        id: '',
+        name: '',
+        floors: null,
+        area: null,
+        propertyFeePrice: null
+      }
+      this.$refs.addForm.resetFields()
     },
     // 添加楼宇
     confirmAdd() {
@@ -232,9 +239,10 @@ export default {
         // console.log('调用接口')
         if (this.addForm.id) {
           await editBuildingAPI(this.addForm)
-          this.addForm = []
           this.$message.success('更新成功')
         } else {
+          // 注意传参参数
+          delete this.addForm.id
           // 调用接口
           await addBuildingAPI(this.addForm)
           this.$message.success('添加成功')
