@@ -8,7 +8,7 @@
     </div>
     <!-- 添加楼宇弹框 -->
     <el-dialog
-      title="添加楼宇"
+      :title="id?'编辑楼宇':'添加楼宇'"
       :visible="dialogVisible"
       width="580px"
       @close="closeDialog"
@@ -33,7 +33,7 @@
         </div>
       </span>
       <template #footer>
-        <el-button size="mini" @click="dialogVisible = false">取 消</el-button>
+        <el-button size="mini" @click="closeDialog">取 消</el-button>
         <el-button size="mini" type="primary" @click="confirmAdd">确 定</el-button>
       </template>
     </el-dialog>
@@ -79,10 +79,12 @@
             <el-button
               size="mini"
               type="text"
+              @click="editBuilding(scope.row)"
             >编辑</el-button>
             <el-button
               size="mini"
               type="text"
+              @click="deleteBuildingById(scope.row.id)"
             >删除</el-button>
           </template>
         </el-table-column>
@@ -104,9 +106,15 @@
 </template>
 
 <script>
-import { getBuildingListAPI, addBuildingAPI } from '@/api/building'
+import { getBuildingListAPI, addBuildingAPI, deleteBuildingByIdAPI, editBuildingAPI } from '@/api/building'
 export default {
   name: 'Building',
+  computed: {
+    //   获取id值做标识
+    id() {
+      return this.addForm.id
+    }
+  },
   data() {
     return {
       params: {
@@ -123,6 +131,7 @@ export default {
       total: 0,
       dialogVisible: false,
       addForm: {
+        id: '',
         name: '',
         floors: null,
         area: null,
@@ -140,6 +149,42 @@ export default {
     this.getBuildingList()
   },
   methods: {
+    // 编辑楼宇信息
+    async editBuilding(row) {
+      // 弹出编辑窗口
+      this.addBuilding()
+      // 解构原本数据
+      const { id, area, floors, name, propertyFeePrice } = row
+      //   数据回填
+      this.addForm = { id, area, floors, name, propertyFeePrice }
+    },
+    // 根据id删除楼宇
+    deleteBuildingById(id) {
+      // console.log(id)
+      this.$confirm('此操作将删除该数据, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        // console.log('ok')
+        // 调用接口
+        await deleteBuildingByIdAPI(id)
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+        // 判断是否最后一页删除，若是且只有一条数据则删完向前退一页
+        if (this.list.length === 1 && this.params.page > 1) {
+          this.params.page--
+        }
+        this.getBuildingList()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
     // 获取楼宇信息列表
     async getBuildingList() {
       const res = await getBuildingListAPI(this.params)
@@ -177,6 +222,7 @@ export default {
     // 关闭弹窗
     closeDialog() {
       this.dialogVisible = false
+      this.addForm = []
     },
     // 添加楼宇
     confirmAdd() {
@@ -184,9 +230,15 @@ export default {
       this.$refs.addForm.validate(async(flag) => {
         if (!flag) return
         // console.log('调用接口')
-        // 调用接口
-        await addBuildingAPI(this.addForm)
-        this.$message.success('添加成功')
+        if (this.addForm.id) {
+          await editBuildingAPI(this.addForm)
+          this.addForm = []
+          this.$message.success('更新成功')
+        } else {
+          // 调用接口
+          await addBuildingAPI(this.addForm)
+          this.$message.success('添加成功')
+        }
         // router.back()
         this.getBuildingList()
         this.closeDialog()
